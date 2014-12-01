@@ -1,8 +1,13 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -17,6 +22,8 @@ public class JumbleSolver {
 		map = new HashMap<String, Set<String>>();
 		//map = new TreeMap<String, Set<String>>();
 		loadWords();
+
+
 	}
 	
 	private void loadWords() {
@@ -24,19 +31,23 @@ public class JumbleSolver {
 		WordList list = new WordList();
 
 		loadWordsFromFile(list);// add all English words to list
-
+		
 		listToMap(list);
-
 	}
 	private void listToMap(WordList list) {
 		// Go to each StringAndFreq in the list, get the String, standardize the
 		// String, associate the standardized String with the Set of English words
 		// that match the standardized String.
 		String s = JOptionPane.showInputDialog(null, "Enter the word to be unsorted" ,"Jumble Solver", JOptionPane.QUESTION_MESSAGE);
-		standardize(s);
-
+		
+		Set<String> temp = map.get(standardize(s));
+		
+		for(String ss :temp){
+			System.out.println(ss + "\n");
+		}
 
 	}
+	
 	private void loadWordsFromFile(WordList list) {
 		// open the wordsEn.txt file and read them into the WordList. 
 		JFileChooser fc = new JFileChooser();
@@ -52,17 +63,19 @@ public class JumbleSolver {
 					temp = temp.replaceAll("[^a-z]-", "");
 					
 					StringAndFreq t = new StringAndFreq(temp);
-					System.out.println(t);
 					list.add(t);
 				}
 			}catch(Exception d){
 				d.printStackTrace();
 			}
+			for(StringAndFreq s: list){
+				addToDictionary(s.getString());
+			}
 		}
 	}
 	public Set<String> getSet(String s){
 		// returns the Set<String> that is associated with the String s
-		return null;
+		return map.get(s);
 
 	}
 	private String standardize(String s) {
@@ -72,22 +85,24 @@ public class JumbleSolver {
 		//              s = "fancy" would return "acfny"
 		s = s.toLowerCase();
 		s = s.replaceAll("[^a-z]","");
-		char temp;
-		int l = 0;
-		String stand = s;
-		for(int i = 0; i < s.length(); i++){
-			for(int x = 0; x < s.length(); x++){
-				if(i != s.length()){
-					if(s.charAt(i) > s.charAt(i+1)){
-						temp = s.charAt(i);
-						stand.replace(stand.charAt(l), temp);
-						l++;
-					}
-				}
-			}	
-		}
-		s = stand;
-		return s;
 
+		char[] chars = s.toCharArray();
+		Arrays.sort(chars);
+		String ss = String.valueOf(chars);
+		
+		return ss;
+
+	}
+	
+	private void addToDictionary(String s){
+		String ss = standardize(s);
+		if(map.containsKey(ss)){
+			getSet(ss).add(s);
+		}
+		else{
+			Set<String> temp = new HashSet<String>();
+			temp.add(s);
+			map.put(ss, temp);
+		}
 	}
 }
